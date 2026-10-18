@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Material Symbols Rounded: play_pause (Apache 2.0) -->
+<!-- Material Symbols Rounded, filled: play_arrow / pause (Apache 2.0). the set's own play_pause
+     has sharp corners and a smaller glyph than the other media icons -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp" android:height="24dp"
     android:viewportWidth="960" android:viewportHeight="960">
-    <group android:translateY="960">
-        <path android:fillColor="#FFFFFFFF" android:pathData="M200-312v-336l240 168-240 168Zm320-8v-320h80v320h-80Zm160 0v-320h80v320h-80Z" />
+    <group android:scaleX="0.7" android:scaleY="0.7" android:translateX="-144" android:translateY="144">
+        <path android:fillColor="#FFFFFFFF" android:pathData="M320,687L320,273Q320,256 332,244.5Q344,233 360,233Q365,233 370.5,234.5Q376,236 381,239L707,446Q716,452 720.5,461Q725,470 725,480Q725,490 720.5,499Q716,508 707,514L381,721Q376,724 370.5,725.5Q365,727 360,727Q344,727 332,715.5Q320,704 320,687Z" />
+    </group>
+    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="60" android:strokeLineCap="round" android:pathData="M433,625L514,335" />
+    <group android:scaleX="0.62" android:scaleY="0.62" android:translateX="434.7" android:translateY="182.4">
+        <path android:fillColor="#FFFFFFFF" android:pathData="M640,760Q607,760 583.5,736.5Q560,713 560,680L560,280Q560,247 583.5,223.5Q607,200 640,200L640,200Q673,200 696.5,223.5Q720,247 720,280L720,680Q720,713 696.5,736.5Q673,760 640,760L640,760ZM320,760Q287,760 263.5,736.5Q240,713 240,680L240,280Q240,247 263.5,223.5Q287,200 320,200L320,200Q353,200 376.5,223.5Q400,247 400,280L400,680Q400,713 376.5,736.5Q353,760 320,760L320,760Z" />
     </group>
 </vector>

@@ -9,7 +9,6 @@ import android.os.ParcelUuid
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -17,7 +16,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -53,8 +60,11 @@ class MainActivity : ComponentActivity() {
                     val haptic = LocalHapticFeedback.current
                     keyboard.value?.let { (label, initial) -> TvKeyboard(label, initial) }
                     // the Freebox ignores POWER while it's on, it only works to wake it
-                    RemotePad(hidePower = powered.value) { haptic.performHapticFeedback(HapticFeedbackType.LongPress); remote.key(it) }
-                    Spacer(Modifier.weight(1f))
+                    // combinedClickable already buzzes when a hold starts
+                    RemotePad(hidePower = powered.value) { code, direction ->
+                        if (direction == Remote.SHORT) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        remote.key(code, direction)
+                    }
                     val s = status.value
                     val connected = s.endsWith(" connected")
                     RemoteButton(
@@ -87,15 +97,21 @@ class MainActivity : ComponentActivity() {
         var text by remember(label, initial) { mutableStateOf(initial) }
         val focus = remember { FocusRequester() }
         LaunchedEffect(label, initial) { focus.requestFocus() }
-        OutlinedTextField(
-            text, { remote.text(text, it); text = it },
-            Modifier.fillMaxWidth().focusRequester(focus),
-            label = { Text(label.ifEmpty { "TV text field" }) },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-            keyboardActions = KeyboardActions(onDone = { remote.submit(); keyboard.value = null }),
-        )
-        RemoteButton("CLOSE KEYBOARD", Modifier.fillMaxWidth()) { keyboard.value = null }
+        Dialog({ keyboard.value = null }) {
+            Surface(shape = RoundedCornerShape(24.dp), color = Color.Black, contentColor = Color.White) {
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(
+                        text, { remote.text(text, it); text = it },
+                        Modifier.fillMaxWidth().focusRequester(focus),
+                        label = { Text(label.ifEmpty { "TV text field" }) },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                        keyboardActions = KeyboardActions(onDone = { remote.submit(); keyboard.value = null }),
+                    )
+                    RemoteButton("CLOSE", Modifier.fillMaxWidth()) { keyboard.value = null }
+                }
+            }
+        }
     }
 
     @Composable
