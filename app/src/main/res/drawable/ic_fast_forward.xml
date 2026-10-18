@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Material Symbols Rounded: fast_forward (Apache 2.0) -->
+<!-- Material Symbols Rounded, filled: fast_forward (Apache 2.0) -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp" android:height="24dp"
     android:viewportWidth="960" android:viewportHeight="960">
-    <group android:translateY="960">
-        <path android:fillColor="#FFFFFFFF" android:pathData="M100-315v-330q0-18 12-29t28-11q5 0 11 1t11 5l248 166q9 6 13.5 14.5T428-480q0 10-4.5 18.5T410-447L162-281q-5 4-11 5t-11 1q-16 0-28-11t-12-29Zm400 0v-330q0-18 12-29t28-11q5 0 11 1t11 5l248 166q9 6 13.5 14.5T828-480q0 10-4.5 18.5T810-447L562-281q-5 4-11 5t-11 1q-16 0-28-11t-12-29ZM180-480Zm400 0Zm-400 90 136-90-136-90v180Zm400 0 136-90-136-90v180Z" />
-    </group>
+    <path android:fillColor="#FFFFFFFF" android:pathData="M100,645L100,315Q100,297 112,286Q124,275 140,275Q145,275 151,276Q157,277 162,281L410,447Q419,453 423.5,461.5Q428,470 428,480Q428,490 423.5,498.5Q419,507 410,513L162,679Q157,683 151,684Q145,685 140,685Q124,685 112,674Q100,663 100,645ZM500,645L500,315Q500,297 512,286Q524,275 540,275Q545,275 551,276Q557,277 562,281L810,447Q819,453 823.5,461.5Q828,470 828,480Q828,490 823.5,498.5Q819,507 810,513L562,679Q557,683 551,684Q545,685 540,685Q524,685 512,674Q500,663 500,645Z" />
 </vector>

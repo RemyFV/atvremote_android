@@ -24,7 +24,10 @@ class Remote(
         // "Android TV Remote" SDP record, found in an HCI capture of the google TV app
         val RFCOMM_UUID: UUID = UUID.fromString("cbbfe0e2-f7f3-4206-84e0-84cbb3d09dfc")
         private const val FEATURES = 622  // same feature bitmask as the google TV app
-        private const val SHORT_PRESS = 3
+        // RemoteKeyInject direction: a hold is START_LONG then END_LONG on release, the box times it itself
+        const val START_LONG = 1
+        const val END_LONG = 2
+        const val SHORT = 3
     }
 
     val prefs = ctx.getSharedPreferences("remote", Context.MODE_PRIVATE)
@@ -38,7 +41,7 @@ class Remote(
     @Volatile private var fieldCounter = 0L
     @Volatile private var imeAction = 0L
 
-    fun key(code: Int) = send(Pb().msg(10, Pb().int(1, code).int(2, SHORT_PRESS)))
+    fun key(code: Int, direction: Int = SHORT) = send(Pb().msg(10, Pb().int(1, code).int(2, direction)))
 
     // one replace-range edit {start, end in old, inserted text}, like the google TV app's RemoteTextEdit
     fun text(old: String, new: String) {
