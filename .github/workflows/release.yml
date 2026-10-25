@@ -3,6 +3,11 @@ name: release
 on:
   push:
     branches: [main]
+    # docs and ci changes are not a release
+    paths-ignore:
+      - "**.md"
+      - "**.jpg"
+      - ".github/**"
 
 permissions:
   contents: write

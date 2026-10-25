@@ -2,6 +2,8 @@
 
 bare-minimum remote for my Freebox Player POP, replacing Remote ATV which stopped waking the box. D-pad, volume, media keys and the TV keyboard, nothing else.
 
+<img src="capture.jpg" width="300">
+
 it speaks the Android TV Remote v2 protocol, the same one as the google TV app, so other Android TV boxes should work too. I've only tested the Freebox.
 
 ## connection
