@@ -8,6 +8,9 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -18,7 +21,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
@@ -84,7 +92,9 @@ private val MEDIA = listOf(
 @Composable
 fun Screen(content: @Composable ColumnScope.() -> Unit) = MaterialTheme(darkColorScheme(background = Color.Black)) {
     Surface(Modifier.fillMaxSize(), color = Color.Black, contentColor = Color.White) {
-        Column(Modifier.safeDrawingPadding().padding(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) { content() }
+        // no IME insets: in split screen the other app's keyboard would squish the remote, and the TV text
+        // dialog is its own window that handles the keyboard itself
+        Column(Modifier.windowInsetsPadding(WindowInsets.systemBars.union(WindowInsets.displayCutout)).padding(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) { content() }
     }
 }
 
@@ -106,6 +116,9 @@ fun RemoteButton(
     Box(
         modifier.height(56.dp).clip(shape).background(color)
             .then(if (highlighted) Modifier.border(3.dp, Color.White, shape) else Modifier)
+            // never focusable: keys typed in another split-screen app leave touch mode for a moment, and the
+            // first focusable button would flash its focus highlight on every keystroke
+            .focusProperties { canFocus = false }
             .combinedClickable(press, LocalIndication.current, onLongClick = onHold?.let { { held = true; it(true) } }, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
@@ -114,18 +127,41 @@ fun RemoteButton(
     }
 }
 
+// below this height (split screen, pop-up window) the ring would shrink to nothing next to the media block,
+// so navigation and media become two swipeable pages instead
+private val PAGED_BELOW = 560.dp
+
 @Composable
-fun ColumnScope.RemotePad(hidePower: Boolean, onKey: (code: Int, direction: Int) -> Unit) {
-    Keys(TOP, hidePower, onKey)
+fun ColumnScope.RemotePad(onKey: (code: Int, direction: Int) -> Unit) =
+    BoxWithConstraints(Modifier.weight(1f).fillMaxWidth()) {
+        if (maxHeight >= PAGED_BELOW) Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            NavKeys(onKey)
+            Keys(MEDIA, onKey)
+        } else Column {
+            val pager = rememberPagerState { 2 }
+            HorizontalPager(pager, Modifier.weight(1f)) { page ->
+                if (page == 0) Column(verticalArrangement = Arrangement.spacedBy(8.dp)) { NavKeys(onKey) }
+                else Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically)) {
+                    Keys(MEDIA, onKey)
+                }
+            }
+            Row(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)) {
+                repeat(2) { Box(Modifier.size(8.dp).clip(CircleShape).background(if (it == pager.currentPage) Color.White else Grey)) }
+            }
+        }
+    }
+
+@Composable
+private fun ColumnScope.NavKeys(onKey: (code: Int, direction: Int) -> Unit) {
+    Keys(TOP, onKey)
     // ring + BACK centered together, the ring gives up 64dp of height for BACK's row
     BoxWithConstraints(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
         val diameter = minOf(maxWidth * 0.75f, maxHeight - 64.dp).coerceAtLeast(0.dp)
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
             DPad(diameter, onKey)
-            Keys(BACK, hidePower, onKey)
+            Keys(BACK, onKey)
         }
     }
-    Keys(MEDIA, hidePower, onKey)
 }
 
 // one disc: 4 quarter-ring zones around a round OK, hit-tested by distance and angle from the center
@@ -181,13 +217,17 @@ private fun DPad(diameter: Dp, onKey: (code: Int, direction: Int) -> Unit, modif
     }
 }
 
-// cell = fixed size per button, null = rows stretch across the screen
 @Composable
-private fun Keys(rows: List<List<Key?>>, hidePower: Boolean, onKey: (code: Int, direction: Int) -> Unit, cell: Modifier? = null) = rows.forEach { row ->
-    Row(if (cell == null) Modifier.fillMaxWidth() else Modifier, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+private fun Keys(rows: List<List<Key?>>, onKey: (code: Int, direction: Int) -> Unit) = rows.forEach { row ->
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         row.forEach { k ->
-            val m = cell ?: Modifier.weight(1f)
-            if (k == null || (hidePower && k.code == KeyEvent.KEYCODE_POWER)) Spacer(m) else KeyButton(k, m, onKey)
+            val m = Modifier.weight(1f)
+            when {
+                k == null -> Spacer(m)
+                // POWER is a circle on the left edge rather than a pill filling its third
+                k.code == KeyEvent.KEYCODE_POWER -> Box(m, contentAlignment = Alignment.CenterStart) { KeyButton(k, Modifier.size(56.dp), onKey) }
+                else -> KeyButton(k, m, onKey)
+            }
         }
     }
 }

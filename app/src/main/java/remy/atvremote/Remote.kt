@@ -18,7 +18,6 @@ class Remote(
     private val ctx: Context,
     private val onStatus: (String) -> Unit,
     private val onKeyboard: (String, String) -> Unit,
-    private val onPowered: (Boolean) -> Unit,
 ) {
     companion object {
         // "Android TV Remote" SDP record, found in an HCI capture of the google TV app
@@ -77,7 +76,6 @@ class Remote(
     private fun drop() {
         runCatching { conn?.close() }
         conn = null; out = null
-        onPowered(false)
     }
 
     // bluetooth last, it's the only way to wake the box once its network is down
@@ -121,7 +119,6 @@ class Remote(
                         .str(1, Build.MODEL).str(2, Build.MANUFACTURER).int(3, 1).str(4, "1")
                         .str(5, "remy.atvremote").str(6, "1.0.0"))))
                     m.containsKey(2) -> { Pb.write(o, Pb().msg(2, Pb().int(1, FEATURES))); ready.countDown(); onStatus("$name connected") }
-                    m.containsKey(40) -> onPowered(m.sub(40)?.long(1) == 1L)
                     m.containsKey(8) -> Pb.write(o, Pb().msg(9, Pb().int(1, m.sub(8)?.long(1) ?: 0)))
                     // input started on the TV: 1 = EditorInfo (1 counter, 2 inputType, 3 imeOptions, 10 hint), 2 = text status
                     m.containsKey(20) -> m.sub(20)?.let { s ->

@@ -20,9 +20,11 @@ the app connects as soon as it's opened. the bottom button turns green when conn
 3. optionally enter the box IP and tap PAIR OVER NETWORK, then type the code from the TV
 4. DONE
 
-## known issues
+## power button
 
-the Freebox ignores POWER while it's on (with deep standby disabled, which is how mine is set), so the button is hidden while the box reports it's on. turn it off from the TV, HDMI-CEC takes the box down with it.
+on the Freebox, POWER only turns the box off if Settings > System > Power button emission mode is set to BLE (bluetooth). in BLE + IR mode the box treats POWER from anything but its own remote as wake-only, so it turns on but never off.
+
+with BLE the Freebox remote's power button stops sending IR to the TV, the box turns the TV off over HDMI-CEC instead.
 
 ## build
 

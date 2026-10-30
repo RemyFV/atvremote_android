@@ -40,9 +40,8 @@ import kotlin.concurrent.thread
 class MainActivity : ComponentActivity() {
     private val status = mutableStateOf("Disconnected")
     private val keyboard = mutableStateOf<Pair<String, String>?>(null)  // label, initial text of the focused TV field
-    private val powered = mutableStateOf(false)
     private val remote by lazy {
-        Remote(this, { status.value = it }, { label, text -> keyboard.value = label to text }, { powered.value = it })
+        Remote(this, { status.value = it }, { label, text -> keyboard.value = label to text })
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,9 +58,8 @@ class MainActivity : ComponentActivity() {
                 } else {
                     val haptic = LocalHapticFeedback.current
                     keyboard.value?.let { (label, initial) -> TvKeyboard(label, initial) }
-                    // the Freebox ignores POWER while it's on, it only works to wake it
                     // combinedClickable already buzzes when a hold starts
-                    RemotePad(hidePower = powered.value) { code, direction ->
+                    RemotePad { code, direction ->
                         if (direction == Remote.SHORT) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         remote.key(code, direction)
                     }
